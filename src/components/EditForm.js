@@ -1,57 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import axiosWithAuth from '../utils/axiosWithAuth';
 
 const initialArticle = {
-    id:"",
-    headline: "",
-    author: "",
-    summary: "",
-    body: ""
+  id:"",
+  headline: "",
+  author: "",
+  summary: "",
+  body: ""
 };
 
 const EditForm = (props)=> {
-    const [article, setArticle]  = useState(initialArticle);
-    const {handleEdit, handleEditCancel, editId} = props;
+  const [article, setArticle]  = useState(initialArticle);
+  const { handleEdit, handleEditCancel, editId } = props;
 
-    const handleChange = (e)=> {
-        setArticle({
-            ...article,
-            [e.target.name]: e.target.value
-        })
-    }
+  useEffect(() => {
+    axiosWithAuth().get(`/articles/${editId}`)
+      .then(resp => {
+        setArticle(resp.data);
+      })
+      .catch(err => {
+        console.log(err);
+      })
+  }, [])
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        handleEdit(article);
-    }
+  const handleChange = (e)=> {
+    setArticle({
+      ...article,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleEdit(article);
+  }
 
 
-    const handleCancel = (e) => {
-        e.preventDefault();
-        handleEditCancel();
-    }
+  const handleCancel = (e) => {
+    e.preventDefault();
+    handleEditCancel();
+  }
 
-    return(<FormContainer onSubmit={handleSubmit}>
-        <h3>Edit Article</h3>
-        <div>
-            <label>Headline</label>
-            <input value={article.headline} id="headline" name="headline" onChange={handleChange}/>
-        </div>
-        <div>
-            <label>Author</label>
-            <input value={article.author} id="author" name="author" onChange={handleChange}/>
-        </div>
-        <div>
-            <label>Summary</label>
-            <input value={article.summary} id="summary" name="summary" onChange={handleChange}/>
-        </div>
-        <div>
-            <label>Body</label>
-            <input value={article.body} id="body" name="body" onChange={handleChange}/>
-        </div>
-        <Button id="editButton">Edit Article</Button>
-        <Button onClick={handleCancel}>Cancel</Button>
-    </FormContainer>);
+  return(
+    <FormContainer onSubmit={handleSubmit}>
+      <h3>Edit Article</h3>
+      <div>
+        <label>Headline</label>
+        <input value={article.headline} id="headline" name="headline" onChange={handleChange}/>
+      </div>
+      <div>
+        <label>Author</label>
+        <input value={article.author} id="author" name="author" onChange={handleChange}/>
+      </div>
+      <div>
+        <label>Summary</label>
+        <input value={article.summary} id="summary" name="summary" onChange={handleChange}/>
+      </div>
+      <div>
+        <label>Body</label>
+        <input value={article.body} id="body" name="body" onChange={handleChange}/>
+      </div>
+      <Button id="editButton">Edit Article</Button>
+      <Button onClick={handleCancel}>Cancel</Button>
+    </FormContainer>
+  );
 }
 
 export default EditForm;

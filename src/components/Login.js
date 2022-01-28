@@ -1,15 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import axios from 'axios';
+
+const initialState = {
+  username:"",
+  password:""
+};
 
 const Login = () => {
+  const [credentials, setCredentials] = useState(initialState);
+  const [error, setError] = useState("");
+  const { push } = useHistory();
+
+  const handleChange = e => {
+    setCredentials({
+      ...credentials,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const login = e => {
+    e.preventDefault();
+    axios.post('http://localhost:5000/api/login', credentials, { username: 'Lambda', password: 'School' })
+      .then(resp => {
+        localStorage.setItem("token", resp.data.token);
+        push("/view");
+      })
+      .catch(err => {
+        console.log(err.response.data);
+        setError(err.response.data);
+      })
+  };
     
-    return(<ComponentContainer>
-        <ModalContainer>
-            <h1>Welcome to Blogger Pro</h1>
-            <h2>Please enter your account information.</h2>
-        </ModalContainer>
-    </ComponentContainer>);
-}
+  return(
+    <ComponentContainer>
+      <ModalContainer>
+        <h1>Welcome to Blogger Pro</h1>
+        <h2>Please enter your account information.</h2>
+        <FormGroup onSubmit={login}>
+          <Label>Username:</Label>
+          <Input
+            id="username"
+            type="text"
+            name="username"
+            value={credentials.username}
+            onChange={handleChange}
+          />
+          <Label>Password:</Label>
+          <Input
+            id="password"
+            type="password"
+            name="password"
+            value={credentials.password}
+            onChange={handleChange}
+          />
+          <Button id="submit">SUBMIT</Button>
+        </FormGroup>
+        {error && <p id="error">{error.error}</p>}
+      </ModalContainer>
+    </ComponentContainer>
+  );
+};
 
 export default Login;
 
